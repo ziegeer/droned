@@ -1,0 +1,122 @@
+#see droned/services/systemstats.py for more complete usage documentation.
+#Collecting basic disk and memory stats
+- SERVICE: &systemstats_all
+    SERVICENAME: systemstats
+    AUTOSTART: yes
+    STATS:
+        - STAT:
+            TYPE: disk
+            PARTITIONS: ["/","/boot"]
+            METRICS: ["usage.percent","usage.free","usage.total","usage.used","counters.read","counters.write","bytes.read","bytes.write","time.read","time.write"]
+            COLLECT_INTERVAL: 10s
+            OUTPUT_INTERVAL: 30s
+            AGGREGATION_METHOD: average
+            OUTPUTS:
+                - OUTPUT: 
+                    TYPE: graphite
+                    METRICS: 
+                        - servers.<hostname>.disk.<partition>.percent_used <usage.percent> 
+                        - servers.<hostname>.disk.<partition>.bytes_free <usage.free>
+                        - servers.<hostname>.disk.<partition>.bytes_total <usage.total>
+                        - servers.<hostname>.disk.<partition>.bytes_used <usage.used>
+                        - servers.<hostname>.disk.<partition>.read_count <counters.read>
+                        - servers.<hostname>.disk.<partition>.write_count <counters.write>
+                        - servers.<hostname>.disk.<partition>.bytes_read <bytes.read>
+                        - servers.<hostname>.disk.<partition>.bytes_write <bytes.write>
+                        - servers.<hostname>.disk.<partition>.time_reading <time.read>
+                        - servers.<hostname>.disk.<partition>.time_writing <time.write>
+        - STAT:
+            TYPE: cpu
+            PER_CPU: yes
+            METRICS: ["usage.percent","time.user","time.system","time.nice","time.iowait","time.irq","time.softirq"]
+            COLLECT_INTERVAL: 10s
+            OUTPUT_INTERVAL: 30s
+            AGGREGATION_METHOD: average
+            OUTPUTS:
+                - OUTPUT: 
+                    TYPE: graphite
+                    METRICS: 
+                        - servers.<hostname>.cpu.<cpu>.percent_used <usage.percent> 
+                        - servers.<hostname>.cpu.<cpu>.user_time_ms <time.user> 
+                        - servers.<hostname>.cpu.<cpu>.system_time_ms <time.system>
+                        - servers.<hostname>.cpu.<cpu>.nice_time_ms <time.nice>
+                        - servers.<hostname>.cpu.<cpu>.iowait_time_ms <time.iowait>
+                        - servers.<hostname>.cpu.<cpu>.irq_time_ms <time.irq>
+                        - servers.<hostname>.cpu.<cpu>.softirq_time_ms <time.softirq>
+        - STAT:
+            TYPE: memory
+            PER_CPU: yes
+            METRICS: ["phymem.total","phymem.used","phymem.free","phymem.percent","phymem.cached","phymem.buffers","virtmem.total","virtmem.used","virtmem.free","virtmem.percent"]
+            COLLECT_INTERVAL: 10s
+            OUTPUT_INTERVAL: 30s
+            AGGREGATION_METHOD: average
+            OUTPUTS:
+                - OUTPUT: 
+                    TYPE: graphite
+                    METRICS: 
+                        - servers.<hostname>.memory.physical_bytes_total <phymem.total> 
+                        - servers.<hostname>.memory.physical_bytes_used <phymem.used> 
+                        - servers.<hostname>.memory.physical_bytes_free <phymem.free> 
+                        - servers.<hostname>.memory.physical_percent_used <phymem.percent> 
+                        - servers.<hostname>.memory.physical_bytes_cached <phymem.cached> 
+                        - servers.<hostname>.memory.physical_buffer_count <phymem.buffers> 
+                        - servers.<hostname>.memory.virtual_bytes_total <virtmem.total> 
+                        - servers.<hostname>.memory.virtual_bytes_used <virtmem.used> 
+                        - servers.<hostname>.memory.virtual_bytes_free <virtmem.free> 
+                        - servers.<hostname>.memory.virtual_percent_used <virtmem.percent> 
+        - STAT:
+            TYPE: network
+            PER_INTERFACE: yes
+            METRICS: ["bytes.sent","bytes.recv","packets.sent","packets.recv"]
+            COLLECT_INTERVAL: 10s
+            OUTPUT_INTERVAL: 30s
+            AGGREGATION_METHOD: average
+            OUTPUTS:
+                - OUTPUT: 
+                    TYPE: graphite
+                    METRICS: 
+                        - servers.<hostname>.network.<nic>.bytes_sent <bytes.sent> 
+                        - servers.<hostname>.network.<nic>.bytes_recv <bytes.recv> 
+                        - servers.<hostname>.network.<nic>.packets_sent <packets.sent> 
+                        - servers.<hostname>.network.<nic>.packets_recv <packets.recv> 
+        - STAT:
+            TYPE: process
+            MATCH_CMDLINE: [".*droned-daemon.py.*"]    
+            METRICS:
+                - threads.count
+                - children.count
+                - files.count
+                - memory.rss
+                - memory.vms
+                - network.connection.count
+                - network.connection.tcp.count
+                - network.connection.udp.count
+                - disk.counters.read
+                - disk.counters.write
+                - disk.bytes.read
+                - disk.bytes.write
+                - cpu.usage.percent
+                - cpu.time.user
+                - cpu.time.system
+            COLLECT_INTERVAL: 10s
+            OUTPUT_INTERVAL: 30s
+            AGGREGATION_METHOD: average
+            OUTPUTS:
+                - OUTPUT: 
+                    TYPE: graphite
+                    METRICS: 
+                        - servers.<hostname>.processes.droned.thread_count <threads.count>
+                        - servers.<hostname>.processes.droned.child_count <children.count>
+                        - servers.<hostname>.processes.droned.file_count <files.count>
+                        - servers.<hostname>.processes.droned.resident_memory_bytes <memory.rss>
+                        - servers.<hostname>.processes.droned.virtual_memory_bytes <memory.vms>
+                        - servers.<hostname>.processes.droned.network_conn_count <network.connection.count>
+                        - servers.<hostname>.processes.droned.network_tcp_conn_count <network.connection.tcp.count>
+                        - servers.<hostname>.processes.droned.network_udp_conn_count <network.connection.udp.count>
+                        - servers.<hostname>.processes.droned.disk_read_counters <disk.counters.read>
+                        - servers.<hostname>.processes.droned.disk_write_counters <disk.counters.write>
+                        - servers.<hostname>.processes.droned.disk_read_bytes <disk.bytes.read>
+                        - servers.<hostname>.processes.droned.disk_write_bytes <disk.bytes.write>
+                        - servers.<hostname>.processes.droned.cpu_usage_percent <cpu.usage.percent>
+                        - servers.<hostname>.processes.droned.cpu_user_time <cpu.time.user>
+                        - servers.<hostname>.processes.droned.cpu_system_time <cpu.time.system>

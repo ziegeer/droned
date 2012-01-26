@@ -1,0 +1,35 @@
+DIRECTIVE: ${ROMEO.include services/graphite.yaml}
+----------------------------------------------------------------------------
+this will include the file /etc/hostdb/includes/services/graphite.yaml in the
+current yaml file. The file will be imported at the current indent level so
+that you may use this include directive within another block:
+-SERVICE:
+    ${ROMEO.include custom/production/my_service_defintion.yaml}
+
+Also includes may themselves inlcude other data sources.
+
+
+
+DIRECTIVE: ${ROMEO.merge_lists *some_list1,*some_list2}
+------------------------------------------------------------------------
+this directive will merge mutltiple arrays into one array.
+this can be usefull if you want to include multiple source files that
+each define an array of interest. because yaml does not support
+array merging natively you can use this directive to achive this. in this
+example we can take the following inputs and expect the following output:
+usage:
+MY_LIST: ${ROMEO.merge_lists *some_list1,*some_list2}
+
+inputs: 
+SERVICE_GROUP: &some_list1
+   - a
+   - b
+   - c
+
+SERVICE_GROUP: &some_list2
+   - d
+   - e
+   - f
+
+output:
+MY_LIST: [a,b,c,d,e,f]

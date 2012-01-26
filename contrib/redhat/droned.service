@@ -1,0 +1,14 @@
+[Unit]
+Description=The DroneD Server
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/droned --config=/etc/droned/droned.conf --nodaemon
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=always
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

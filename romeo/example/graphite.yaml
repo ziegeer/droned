@@ -1,0 +1,7 @@
+- SERVICE: &graphite1
+    SERVICENAME: graphite #this is a droned service name to start
+    GRAPHITE_HOST: graphite1.mydomain.com
+    GRAPHITE_PORT: 2004
+    GRAPHITE_FORMAT: pickle #other option is line, check carbon.conf to see which to use based on port.
+    GRAPHITE_DELAY: 0 #an optional value to put a delay between sending indivdual metrics
+    GRAPHITE_TIMEOUT: 5.0 #an optional value to set a timeout to connect to graphite 5 sec is default.

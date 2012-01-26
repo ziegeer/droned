@@ -1,0 +1,12 @@
+###############################################################################
+# SysV Daemon Settings
+###############################################################################
+
+#pid file location, default is in init script
+#PIDFILE=/var/run/droned.pid
+
+#how to launch
+OPTIONS="--config=/etc/droned/droned.conf"
+
+#location of the launcher
+COMMAND=/usr/bin/droned

@@ -1,0 +1,167 @@
+%YAML 1.1
+---
+
+###############################################################################
+# In all reality the most important KEYS are NAME and SERVER. The reason you
+# would seperate out blocks is for reusability for complex similiar app servers
+# that share attributes but are disimmilar enough to drive one mad if it failed
+# and you found yourself having to rebuild it from scratch without a blueprint.
+# When fully expanding the SERVER key with a parser such as PyYAML you will see
+# the bare minimum SERVER configuration and structure that an application such
+# as droned would expect.  This structure is designed to be easily viewable by
+# a human being when viewing the raw yaml itself.  The ROMEO library will make
+# this human friendly config natural for a programmer to use in code as well,
+# with the goal of not having to worry much about the data structure that backs
+# the modeled objects.
+#
+# You may add additional KEY VALUE pairs at will to any structure and ROMEO
+# will make them available to a programmer for access.  As a convention these
+# KEYS should be all uppercase and unique (ie don't use the same key in 
+# multiple object descriptions, unless you like confusing yourself later).
+#
+#
+# Wikipedia has a pretty decent primer on YAML if this is your first time
+# seeing or working with it.  Play around and have fun, it is neat.
+#
+#     http://en.wikipedia.org/wiki/Yaml
+#
+###############################################################################
+
+#!!warning yaml like python is indentation sensitive!!
+
+- NAME: test #the name of this environmental object
+
+- BASEMODEL: &base-artifact-template
+    INSTANCES: 1 #how many instances of this application should be expected
+    INSTALLMETHOD: null #may be useful to other applications
+    #Class is located lib/droned/applications/%{some_provider}.py
+    CLASS: RPMApplication #application plugin __class__ to handle app specific logic
+    CLASSARGS: [] #pass position dependant args to the plugin
+    CLASSKWARGS: {} #pass position independant kwargs to the plugin
+    SEARCH_DELAY: 5.0 #how long for DroneD to wait before seeking a new app
+    AUTO_RECOVER: yes #allow DroneD to restart your enabled apps automatically
+    ASSIMILATION_PATTERN: null #DroneD won't even look for your app
+
+#yaml is awesome btw
+
+#An ARTIFACT contains all of the information DroneD could possibly need to manage
+#your application, plugins use this information to make decisions about how some
+#action should be accomplished.
+- ARTIFACT: &apache-artifact
+    #merge template defaults and override specific keys
+    <<: *base-artifact-template
+    #assimilation works "like" ``ps -ef | grep ".*httpd -k start"``
+    ASSIMILATION_PATTERN: ".*httpd -k start" #may very system to system
+    STARTUP_INFO:
+        START_ENV: {} #key, value env settings
+        START_CMD: '/usr/bin/service' #full path to execute a start command
+        START_ARGS: ['httpd', 'start'] #command line switches to pass to the start command
+    SHUTDOWN_INFO:
+        STOP_ENV: {} #key, value env settings
+        STOP_CMD: '/usr/bin/service' #full path to execute a stop command
+        STOP_ARGS: ['httpd', 'stop'] #command line switches to pass to the start command
+    SHORTNAME: httpd #this should be an app name (httpd)
+    FULLNAME: httpd #this should be the full name (in the case of rpm systems it is)
+
+
+- ARTIFACT: &ejabberd-artifact
+    #merge template defaults and override specific keys
+    <<: *base-artifact-template
+    ASSIMILATION_PATTERN: ".*beam.*ejabberd/ebin"
+    STARTUP_INFO:
+        START_ENV: {} #key, value env settings
+        START_CMD: '/usr/bin/service' #full path to execute a start command
+        START_ARGS: ['ejabberd', 'start'] #command line switches for the start command
+    SHUTDOWN_INFO:
+        STOP_ENV: {} #key, value env settings
+        STOP_CMD: '/usr/bin/service' #full path to execute a stop command
+        STOP_ARGS: ['ejabberd', 'stop'] #command line switches for the stop command
+    SHORTNAME: ejabberd #this should be an app name (httpd)
+    FULLNAME: ejabberd #this should be the full name (in the case of rpm systems it is)
+
+
+- ARTIFACT: &dhcpd-artifact
+    #merge template defaults and override specific keys
+    <<: *base-artifact-template
+    ASSIMILATION_PATTERN: "/usr/sbin/dhcpd -d.*" 
+    STARTUP_INFO:
+        START_ENV: {} #key, value env settings
+        START_CMD: '/usr/bin/service' #full path to execute a start command
+        START_ARGS: ['dhcpd', 'start'] #command line switches for the start command
+    SHUTDOWN_INFO:
+        STOP_ENV: {} #key, value env settings
+        STOP_CMD: '/usr/bin/service' #full path to execute a stop command
+        STOP_ARGS: ['dhcpd', 'stop'] #command line switches for the stop command
+    SHORTNAME: dhcpd #this should be an app name (httpd)
+    FULLNAME: dhcpd #this should be the full name (in the case of rpm systems it is)
+
+
+- ARTIFACT: &named-artifact
+    #merge template defaults and override specific keys
+    <<: *base-artifact-template
+    ASSIMILATION_PATTERN: "/usr/sbin/named -u named.*" 
+    STARTUP_INFO:
+        START_ENV: {} #key, value env settings
+        START_CMD: '/usr/bin/service' #full path to execute a start command
+        START_ARGS: ['named', 'start'] #command line switches for the start command
+    SHUTDOWN_INFO:
+        STOP_ENV: {} #key, value env settings
+        STOP_CMD: '/usr/bin/service' #full path to execute a stop command
+        STOP_ARGS: ['named', 'stop'] #command line switches for the stop command
+    SHORTNAME: bind #this should be an app name (httpd)
+    FULLNAME: named #this should be the full name (in the case of rpm systems it is)
+
+
+- SERVERGROUP: &apache-group
+    #ARTIFACTS contain a list of associative arrays with a
+    #ton of information DroneD needs, to manage an application.
+    ARTIFACTS: [ *apache-artifact ]
+
+
+- SERVERGROUP: &ejabber-group
+    ARTIFACTS: [ *ejabberd-artifact ]
+
+
+- SERVERGROUP: &dhcpd-group
+    ARTIFACTS: [ *dhcpd-artifact ]
+
+
+- SERVERGROUP: &named-group
+    ARTIFACTS: [ *named-artifact ]
+
+
+- SERVERGROUP: &everything-group
+    ARTIFACTS:
+      - *apache-group
+      - *ejabberd-artifact
+      - *dhcpd-artifact
+      - *named-artifact
+
+###############################################################################
+# A note about HOSTNAME, this much match whatever your system thinks it is.
+#
+# [testing@jabber ~]# python
+# Python 2.7.1 (r271:86832, Apr 12 2011, 16:15:16) 
+# [GCC 4.6.0 20110331 (Red Hat 4.6.0-2)] on linux2
+# Type "help", "copyright", "credits" or "license" for more information.
+# >>> import socket
+# >>> socket.gethostname()
+#
+# 'jabber' <----------- So our HOSTNAME would be 'jabber' as far as DroneD cares
+#
+# Preferably your hostname would be your DNS entry, but not everyone's server
+# environments make that possible, so when in doubt do yourself a favor and
+# check before your write your configuration.
+###############################################################################
+
+
+# ^ READ ABOVE FIRST
+#SERVER associative arrays need member HOSTNAME and ARTIFACTS
+- SERVER:
+    HOSTNAME: myhost #machine name identifier that uniquely identifies a host
+    #<<: *apache-group
+    <<: *everything-group
+
+- SERVER:
+    HOSTNAME: mydhcpserver.mycompany.net #yay your hostname if fully qualified
+    <<: *dhcpd-group

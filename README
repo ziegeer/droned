@@ -1,0 +1,64 @@
+This is DroneD version 0.9.0
+============================
+Copyright (c) 2006 to the present, Orbitz Worldwide, LLC.
+
+
+License information
+-------------------
+
+See the file "LICENSE" for information on the history of this
+software, terms & conditions for usage, and a DISCLAIMER OF ALL
+WARRANTIES.
+
+This DroneD distribution contains no GNU General Public Licensed
+(GPLed) code so it may be used in proprietary projects.  There are 
+interfaces to some GNU code but these are entirely optional.
+
+All trademarks referenced herein are property of their respective
+holders.
+
+
+What's new in this release?
+---------------------------
+
+See the file "NEWS".
+
+
+What is DroneD?
+---------------
+
+DroneD is a service container geared towards application management and monitoring. It provides a rich API for implementing services and messaging interfaces. It is built on the Twisted framework, and utilizes the BlasterProtocol  and/or XMPP for network communication. DroneD is currently used as the management framework for all components of the Orbitz Flight Search Farms.
+
+
+Service-Oriented Architecture
+-----------------------------
+
+The DroneD service API provides several useful facilities to service authors such as an event model, persistent state attributes, logging, run control, macromanagement, automatic monitoring interface, and a highly scalable client messaging interface.
+
+Since behavior is encapsulated in services, a DroneD server can perform whatever set of tasks you require by configuring the appropriate services. By using EON, DroneD faciliates both micromanagement and macromanagement. Because of the BlasterProtocol, managing thousands of hosts in a single environment is fast, reliable, and easy.
+
+
+Domain-specific packages
+------------------------
+
+Originally DroneD was developed to manage the Orbitz Flight Search farms. However all of the Orbitz-specific functionality resides in a set of modules that are packaged independently and not distributed with the core of DroneD. 
+
+
+Development
+-----------
+
+DroneD is developed and maintained by Orbitz Worldwide an Industry Leading Online Travel Agency. The code lives in our git repository at https://github.com/OrbitzWorldwide/droned
+
+If you are interested in developing a DroneD system, please consult the SOS development team.
+
+
+Maintainers
+-----------
+Justin Venus
+
+
+Authors
+-------
+Chris M. Davis
+Chris Brinley
+Justin Venus

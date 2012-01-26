@@ -1,0 +1,85 @@
+#!/bin/bash
+# file: droned
+# chkconfig: 2345 1 99
+# description: DroneD Application and Service Management Framework
+#
+# processname: droned.py
+# config: /etc/sysconfig/droned
+# pidfile: /var/run/droned.pid
+#
+### BEGIN INIT INFO
+# Provides: droned
+# Required-Start: $local_fs $remote_fs $network $named
+# Required-Stop: $local_fs $remote_fs $network
+# Short-Description: start and stop DroneD Service
+# Description: DroneD Application and Service Management Framework
+### END INIT INFO
+
+# Source function library
+if [ -f /etc/rc.d/init.d/functions ];then
+	. /etc/rc.d/init.d/functions
+fi
+
+prog=droned
+# Source application settings
+if [ -f /etc/sysconfig/${prog} ]; then
+        . /etc/sysconfig/${prog}
+fi
+pidfile=${PIDFILE-/var/run/${prog}.pid}
+lockfile=${LOCKFILE-/var/lock/subsys/${prog}}
+RETVAL=0
+
+
+start() {
+        echo -n $"Starting $prog: "
+	daemon $COMMAND $OPTIONS --pidfile=${pidfile}
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ] && touch ${lockfile}
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        $COMMAND $OPTIONS --pidfile=${pidfile} --stop >&/dev/null
+        RETVAL=$?
+        echo
+	[ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        if status -p ${pidfile} $prog >&/dev/null; then
+		status -p ${pidfile} $prog
+	else
+        	start
+	fi
+        ;;
+  stop)
+        if ! status -p ${pidfile} $prog >&/dev/null; then
+		status -p ${pidfile} $prog
+	else
+        	stop
+	fi
+        ;;
+  status)
+        status -p ${pidfile} $prog
+        RETVAL=$?
+        ;;
+  restart)
+	stop
+	start
+        ;;
+  condrestart|try-restart)
+        if status -p ${pidfile} $prog >&/dev/null; then
+                stop
+		start
+        fi
+        ;;
+  *)
+        echo $"Usage: $prog {start|stop|restart|condrestart|status}"
+        RETVAL=3
+esac
+
+exit $RETVAL

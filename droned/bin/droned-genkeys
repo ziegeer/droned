@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ "$1" == "" ]
+then
+	echo "Usage: genkeys <keyname>"
+	exit 1
+fi
+
+echo "Generating private key $1.private"
+openssl genrsa -out $1.private
+echo "Generating public key $1.public"
+openssl rsa -in $1.private -pubout -out $1.public
+echo "Done"

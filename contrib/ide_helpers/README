@@ -1,0 +1,54 @@
+to install these helpers you must be using eclipse and have pydev plugin installed.
+
+INSTALL:
+	pydev plugins:
+		in eclipse choose window > preferences > pydev > Scripting PyDev
+		in the "location of additional jython scripts" field choose browse
+		browse to <workspace_home>/<droned_project>/contrib/ide_helpers
+		click OK
+	droned templates:
+	 	in eclipse choose window > preferences > pytdev > editor > templates
+	 	click import
+	 	browse to <workspace_home>/<droned_project>/contrib/ide_helpers
+	 	select droned-templates.xml
+	 	
+		
+
+in any python file being edited in eclipse click ctrl-2.
+choose "clear-template-cache" (this is the first option) from the window that appears.
+
+
+
+What's included: 
+	template helpers:
+		module_shortname variable
+			this will insert the name of the module your currently creating in a template
+			similar to module, but module insterts fully qualified name.
+	module templates:
+		info: templates to create common py files
+		usage:
+			in package explorer > right click > new pydev module > choose one of droned*
+		Droned Service template:
+			provides skeleton and common imports to create a droned service
+		Droned Model Template:
+			provides skeleton and common imports to create a droned model
+			these are commonly required by services to provide specific 
+			implementation logic.
+		Droned Protocol Template:
+			These are the same as std twisted templates. They handle the
+			sequence and associating logic with various state transitions.
+			Example on tcp connection receive execute MyModel.do()
+	editor templates:
+		info: templates to create common language constructs
+		usage: 
+			in a py file press <ctl>-space. begin to type name
+			of construct, name given below. press enter to insert.
+		Droned Entity class:
+			name: "droned entity"
+			builds out a simple entity template. note you must still
+			import entity if you have not done so already.
+			cursor will be placed here:
+			class ${cursor}(Entitiy): #rest
+			this allows you to quickly type the name of your entity
+			following the insert. 
+		

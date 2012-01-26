@@ -1,0 +1,129 @@
+#!/usr/bin/python
+###############################################################################
+#   Copyright 2011 Orbitz Worldwide
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+###############################################################################
+
+import getopt
+import sys
+import romeo
+
+romeo.reload() #this may need to be configurable in the future
+
+#FIXME add json output support
+try: #older python
+    import simplejson as json
+except ImportError:
+    try: #python2.6+
+        import json
+    except ImportError:
+        json = None #no json support
+
+__rlsdoc__ = """
+Usage: rls [options] query
+
+Options:
+	-h		Display this help
+	-l		List all known environments
+	-e environment	Use data from this specified environment 
+	-d delimiter	Delimeter (newline by default)
+	-o file 	Write output to a file
+
+"""
+
+class RLS(object):
+    SHORT = property(lambda s: "le:o:hd:")
+    VERBOSE = property(lambda s: [
+        'help',
+        'environment=',
+        'delimiter=',
+    ])
+
+    def usage(self):
+        doc = __rlsdoc__
+        querydoc = romeo.grammars.get_handlers().values()
+        if querydoc:
+            doc += 'Queries:\n'
+            for obj in querydoc:
+                doc += "\t%s\n" % (obj.__doc__,)
+        self.out.write(doc+'\n')
+
+
+    def __init__(self):
+        self.out = sys.stdout
+        try:
+            self.opts, self.args = getopt.getopt(
+                sys.argv[1:],
+                self.SHORT,
+                self.VERBOSE
+            )
+        except:
+            self.usage()
+            sys.exit(2)
+
+        self.environment = None
+        self.delim = '\n'
+        self.listEnvs = False
+
+
+        for o, a in self.opts:
+            if o in ('-h', '--help'):
+                self.usage()
+                sys.exit()
+            elif o in ('-d', '--delimiter'):
+                self.delim = a
+            elif o in ('-e', '--environment'):
+                try:
+                    self.environment = romeo.getEnvironment(a)
+                except romeo.EnvironmentalError, e:
+                    sys.stderr.write(str(e) + '\n')
+                    self.usage()
+                    sys.exit(1)
+            elif o == '-l':
+                self.listEnvs = True
+            elif o == '-o':
+                self.out.close() #could have used dup, but that felt weird
+                self.out = open(a, 'w')
+
+    def __call__(self):
+        result = set()
+        try:
+            if self.listEnvs:
+                for obj in romeo.foundation.RomeoKeyValue.search('NAME'):
+                    result.add(obj)
+            else:
+                for obj in romeo.grammars.search(' '.join(self.args)):
+                    result.add(obj)
+                    if not result: 1 + 1 #this is stupid and flaky
+        except romeo.grammars.NoMatch:
+            self.usage()
+            sys.exit(1)
+        except Exception, e:
+            sys.stderr.write(str(e) + '\n')
+            sys.exit(1)
+        #filter out null values
+        result = [ i for i in result if i.VALUE ]
+        #filter out unprintable values
+        result = [ i for i in result if not i.COMPLEX_CONSTRUCTOR ]
+        #filter out by environment
+        if isinstance(self.environment, romeo.foundation.RomeoKeyValue):
+            result = [ i for i in result if self.environment.isChild(i) ]
+        #write out data
+        self.out.write(self.delim.join([ i.VALUE for i in result])+'\n')
+
+rls = RLS()
+rls()
+rls.out.flush()
+if rls.out != sys.stdout:
+    rls.out.close() #close file

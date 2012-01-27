@@ -1,19 +1,19 @@
-#!/bin/bash
+#!/bin/sh
 
 ###############################################################################
 # Quickly make a source distribution that should work on ALL POSIX systems
-# that have a bash shell #FIXME make this work with bourne as least common
-# denominator.
+# that have a bourne shell
 ###############################################################################
 
 #Reference For POSIX Commands
 #http://manuals.ts.fujitsu.com/file/8867/posix_k.pdf
 
 #where am i really from?
-LOCATION=$(dirname $(readlink -f $0))
+PROG=`readlink -f $0`
+LOCATION=`dirname $PROG`
 cd ${LOCATION} #make sure we are in the right place
 
-VERSION=$(tr -d '\n' < VERSION)
+VERSION=`tr -d '\n' < VERSION`
 
 #create a scatch space
 mkdir -p ${LOCATION}/.tmp/droned-${VERSION}

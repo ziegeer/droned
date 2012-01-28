@@ -122,7 +122,7 @@ def command(executable, args, env, path, usePTY, childFD, protocol,
         newargs = []
         #sanitize arguments, b/c devs do silly things ... including myself
         for i in list(_fix_args(executable, args)):
-            newargs += filter(lambda b: b, i.split(' ')) #FIXME lambda in filter
+            newargs += i.split(' ')
         args = tuple(newargs)
 
     from twisted.internet import reactor
